@@ -15,12 +15,15 @@ export const createUser = createAsyncThunk(
       if (data.avatar) {
         formData.append("avatar", data.avatar);
       }
-      formData.append("coverImage",data.coverImage || "")
+      if (data.coverImage) {
+         formData.append("coverImage",data.coverImage || "")
+      }
       const response = await axios.post(
         "http://localhost:8000/api/v1/users/register",
         formData,
         
       );
+      console.log("cover image data ...>",data.coverImage)
       console.log("respone ",response.data)
       return response.data;
     } catch (error) {
@@ -30,11 +33,62 @@ export const createUser = createAsyncThunk(
 );
 
 
+export const loginUser= createAsyncThunk('loginuser',async(data,{rejectWithValue})=>{
+  
+
+  try {
+
+    const response= await axios.post("http://localhost:8000/api/v1/users/login",data)
+    console.log("response data",response.data)
+    
+     if (response.data.data?.accessToken) {
+       localStorage.setItem('accessToken',response.data.data?.accessToken)
+     }
+
+     if (response.data.data?.refreshToken) {
+       localStorage.setItem('refreshToken',response.data.data?.refreshToken)
+     }
+     return response.data
+    
+  } catch (error) {
+    return rejectWithValue(error)
+  }
+
+
+
+ })
+
+
+export const logoutUser = createAsyncThunk(
+  "auth/logout",
+  async (_, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("accessToken");
+
+      await axios.post(
+        "http://localhost:8000/api/v1/users/logout",
+        {},
+      );
+
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+
+      return true; // ✅ Used in reducer
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+
+
+
 
 const initialState = {
-  user: [],
-  loading: null,
+  user: null,
+  loading: false,
   error: null,
+  status:false
 };
 
 const authSlice = createSlice({
@@ -48,12 +102,22 @@ const authSlice = createSlice({
     })
       .addCase(createUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.user.push( action.payload)
-        console.log("action.payload",action.payload)
       })
       .addCase(createUser.rejected, (state, action) => {
         (state.loading = false), (state.error = action.payload);
-      });
+      })
+      .addCase(loginUser.pending,(state)=>{
+        state.status=false
+        state.loading=true
+      })
+      .addCase(loginUser.fulfilled,(state,action)=>{
+       state.loading=false
+       state.status=true
+       state.user=action.payload.data?.user
+
+       console.log("state.user",action.payload)
+
+      })
   },
 });
 

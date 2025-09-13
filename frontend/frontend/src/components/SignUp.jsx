@@ -1,152 +1,193 @@
-import React, { useState } from 'react'
-import { useDispatch } from 'react-redux'
-import { createUser } from './store/authSlice'
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import { createUser } from "./store/authSlice";
 
+function SignUp() {
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState(null);
+  const [avatar, setAvatar] = useState(null);
+  const [coverImage, setCoverImage] = useState(null);
 
-export default function SignUp() {
+  const dispatch = useDispatch();
+  const loading = useSelector((state) => state.auth.loading);
+  const navigate = useNavigate();
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
-  const [form, setFrom] = useState({
-    fullName: '',
-    email: '',
-    password: '',
-    username: '',
-    
-  })
+  const onSubmit = (data) => {
+    const userData = { ...data, avatar, coverImage };
 
-  const [avatar, setAvatar] = useState("")
-  const [coverImage, setcoverImage] = useState("")
-  const [error, setError] = useState(null)
+    dispatch(createUser(userData))
+      .unwrap()
+      .then(() => {
+        setMessage("🎉 User registered successfully!");
+        setError(null);
+        setTimeout(() => navigate("/login"), 2000);
+      })
+      .catch(() => {
+        setError("❌ User already exists");
+        setMessage("");
+      });
+  };
 
-  const dispatch = useDispatch()
-
-
-
-  const handleinput = (e) => {
-    const { name, value } = e.target
-    setFrom((prev) => (
-      { ...prev, [name]: value }))
-
-
+  if (loading) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500">
+        <div className="animate-spin rounded-full h-16 w-16 border-4 border-white border-t-transparent"></div>
+        <p className="mt-4 text-white font-medium">Creating account...</p>
+      </div>
+    );
   }
-
-
-  const handleSubmit = (e) => {
-
-    e.preventDefault()
-    const userData = { ...form, avatar ,coverImage}
-
-    if (!form) {
-      console.log("please filled the required field")
-    }
-    dispatch(createUser({ ...userData }))
-    console.log('user data send succesfully', userData)
-
-
-  }
-
-  console.log("avatr", avatar)
-  console.log("coverImage", coverImage)
-
-
-
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-6">
-        <h2 className="text-2xl font-semibold mb-2 text-center">Create your account</h2>
-        <p className="text-sm text-gray-500 mb-6 text-center">Quick and secure signup</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-6">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8">
+        {/* Header */}
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
+          Create Account
+        </h2>
+        <p className="text-sm text-gray-500 mb-6 text-center">
+          Join us and start your journey 🚀
+        </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Messages */}
+        {message && (
+          <p className="p-3 mb-4 rounded-md bg-green-50 text-green-700 border border-green-200 text-center text-sm">
+            {message}
+          </p>
+        )}
+        {error && (
+          <p className="p-3 mb-4 rounded-md bg-red-50 text-red-600 border border-red-200 text-center text-sm">
+            {error}
+          </p>
+        )}
+
+        {/* Form */}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          {/* Full Name */}
           <div>
-            <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">Full name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Full Name
+            </label>
             <input
-              id="fullName"
-              name="fullName"
-              className="mt-1 block w-full rounded-lg border border-gray-200 px-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
-              placeholder="Jane Doe"
-              value={form.fullName}
-              onChange={handleinput}
+              type="text"
+              {...register("fullName", { required: true })}
+              placeholder="Enter your full name"
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
             />
+            {errors.fullName && (
+              <p className="text-red-500 text-xs mt-1">
+                Full name is required
+              </p>
+            )}
           </div>
 
+          {/* Username */}
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700">Username</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Username
+            </label>
             <input
-              id="username"
-              name="username"
-              className="mt-1 block w-full rounded-lg border border-gray-200 px-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
-              placeholder="janedoe"
-              value={form.username}
-              onChange={handleinput}
-
+              type="text"
+              {...register("username", { required: true })}
+              placeholder="Choose a username"
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
             />
+            {errors.username && (
+              <p className="text-red-500 text-xs mt-1">
+                Username is required
+              </p>
+            )}
           </div>
 
+          {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
             <input
-              id="email"
-              name="email"
               type="email"
-              className="mt-1 block w-full rounded-lg border border-gray-200 px-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
-              placeholder="you@example.com"
-              value={form.email}
-              onChange={handleinput}
-
+              {...register("email", { required: true })}
+              placeholder="Enter your email"
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
             />
+            {errors.email && (
+              <p className="text-red-500 text-xs mt-1">Email is required</p>
+            )}
           </div>
 
+          {/* Password */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
             <input
-              id="password"
-              name="password"
               type="password"
-              className="mt-1 block w-full rounded-lg border border-gray-200 px-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
-              placeholder="At least 8 characters"
-              value={form.password}
-              onChange={handleinput}
-
+              {...register("password", { required: true })}
+              placeholder="Enter a strong password"
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
             />
+            {errors.password && (
+              <p className="text-red-500 text-xs mt-1">
+                Password is required
+              </p>
+            )}
           </div>
 
+          {/* Avatar */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Avatar</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Avatar
+            </label>
             <input
-              id="avatar"
-              name="avatar"
               type="file"
               accept="image/*"
-              // value={avatar}
               onChange={(e) => setAvatar(e.target.files[0])}
-              className="mt-1 block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700"
+              className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
             />
-            <p className="mt-1 text-xs text-gray-500">PNG, JPG up to 5MB.</p>
-          </div> <div>
-            <label className="block text-sm font-medium text-gray-700">Cover Image</label>
-            <input
-              id="coverImage"
-              name="coverImage"
-              type="file"
-              accept="image/*"
-              // value={avatar}
-              onChange={(e) => setcoverImage(e.target.files[0])}
-              className="mt-1 block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700"
-            />
-            <p className="mt-1 text-xs text-gray-500">PNG, JPG up to 5MB.</p>
           </div>
 
+          {/* Cover Image */}
           <div>
-            <button
-              type="submit"
-              className="w-full inline-flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 transition"
-            >
-              Create account
-            </button>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Cover Image
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setCoverImage(e.target.files[0])}
+              className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+            />
           </div>
+
+          {/* Button */}
+          <button
+            type="submit"
+            className="w-full py-3 rounded-lg bg-indigo-600 text-white font-semibold shadow-md hover:bg-indigo-700 transition"
+          >
+            Create Account
+          </button>
         </form>
+
+        {/* Footer */}
+        <p className="mt-6 text-center text-sm text-gray-600">
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="text-indigo-600 font-medium hover:underline"
+          >
+            Sign in
+          </Link>
+        </p>
       </div>
     </div>
-  )
+  );
 }
+
+export default SignUp;
