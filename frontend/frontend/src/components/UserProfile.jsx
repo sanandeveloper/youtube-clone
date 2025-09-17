@@ -1,8 +1,24 @@
 import React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { removeAvatar } from "./store/authSlice";
 
 export default function UserProfileStepper() {
   const user = useSelector((state) => state.auth.user);
+  const loading = useSelector((state) => state.auth.loading);
+  const dispatch=useDispatch()
+
+
+   const deleteAvatar=()=>{
+
+     if (user) {
+        dispatch(removeAvatar())
+     }
+
+   }
+
+
+   const navigate=useNavigate()
 
   if (!user) {
     return (
@@ -13,6 +29,23 @@ export default function UserProfileStepper() {
       </div>
     );
   }
+  
+  if (loading) {
+  return (
+    <div className="flex items-center justify-center h-screen">
+      <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+      <span className="ml-3 text-lg font-medium text-gray-600">
+        Loading...
+      </span>
+    </div>
+  )
+}
+
+
+
+
+
+
 
   // fallback images
   const coverSrc = user.coverImage || "https://via.placeholder.com/1200x360?text=Cover+Image";
@@ -64,7 +97,7 @@ export default function UserProfileStepper() {
                   <div className="flex items-center gap-2">
                     <button
                       className="px-3 py-1 text-sm bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700"
-                      // wire your handler here: onClick={() => openCoverEdit()}
+                      onClick={()=>navigate("/changecoverimage")}
                     >
                       Edit
                     </button>
@@ -106,6 +139,7 @@ export default function UserProfileStepper() {
 
                   <div className="flex items-center gap-2">
                     <button
+                     onClick={()=>{navigate('/changeavatar')}}
                       className="px-3 py-1 text-sm bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700"
                       // onClick={() => openAvatarEdit()}
                     >
@@ -113,7 +147,7 @@ export default function UserProfileStepper() {
                     </button>
                     <button
                       className="px-3 py-1 text-sm bg-gray-100 rounded-md hover:bg-gray-200"
-                      // onClick={() => removeAvatar()}
+                       onClick={deleteAvatar}
                     >
                       Remove
                     </button>

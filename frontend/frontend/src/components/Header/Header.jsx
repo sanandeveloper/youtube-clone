@@ -1,14 +1,24 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Search, Bell, Video, User } from "lucide-react";
+import { useState } from "react";
+import LogoutBtn from "./LogoutBtn";
+import Action from "../Action";
 
 function Header() {
   const authStatus = useSelector((state) => state.auth.status);
   console.log("authstatus",authStatus)
+
+  const [showAction,setShowAction]=useState(false)
   
   const user = useSelector((state) => state.auth.user);
   const navigate = useNavigate();
+
+  useEffect(()=>{
+
+    setShowAction(false)
+  },[authStatus])
 
   const navItem = [
     { path: "/", name: "Home", active: authStatus },
@@ -48,25 +58,59 @@ function Header() {
 
         {/* RIGHT: Icons + Profile/Login */}
         <div className="flex items-center gap-4">
-          {authStatus && (
-            <>
+         {authStatus &&(
+
+          <div>
               <button className="p-2 hover:bg-gray-100 rounded-full">
                 <Video className="w-5 h-5 text-gray-700" />
               </button>
               <button className="p-2 hover:bg-gray-100 rounded-full">
                 <Bell className="w-5 h-5 text-gray-700" />
               </button>
-              <img
-                src={
-                  user?.avatar ||
-                  "https://via.placeholder.com/40x40.png?text=U"
-                }
-                alt="avatar"
-                onClick={() => navigate("/user")}
-                className="w-9 h-9 rounded-full cursor-pointer border"
-              />
-            </>
-          )}
+          </div>
+         )}
+  {authStatus && (
+  <div className="relative">
+    <img
+      src={user?.avatar || "https://via.placeholder.com/40x40.png?text=U"}
+      alt="avatar"
+      onClick={()=>setShowAction(!showAction)}
+      className="w-10 h-10 rounded-full cursor-pointer border shadow-sm hover:scale-105 transition-transform"
+    />
+
+    {showAction && (  
+      <div className="absolute right-0 mt-2 w-48 bg-white shadow-xl rounded-2xl py-2 border">
+        <ul className="space-y-1">
+          <li
+            onClick={() => {
+              setShowAction(false);
+              navigate("/user");
+            }}
+            className="cursor-pointer px-4 py-2 text-gray-600 hover:bg-blue-500 hover:text-white rounded-lg transition-colors"
+          >
+            Profile
+          </li>
+          <li
+            onClick={() => {
+              setShowAction(false);
+              navigate("/changepassword");
+            }}
+            className="cursor-pointer px-4 py-2 text-gray-600 hover:bg-blue-500 hover:text-white rounded-lg transition-colors"
+          >
+            Change Password
+          </li>
+          <li className="cursor-pointer px-4 py-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors">
+            <LogoutBtn />
+          </li>
+        </ul>
+      </div>
+    )}
+  </div>
+)}
+
+        
+         
+   
 
           {!authStatus &&
             navItem.map(

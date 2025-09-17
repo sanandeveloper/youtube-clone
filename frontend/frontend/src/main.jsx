@@ -9,6 +9,8 @@ import SignUp from './components/SignUp.jsx'
 import Login from './components/Login.jsx'
 import UserProfile from './components/UserProfile.jsx'
 import LogoutBtn from './components/Header/LogoutBtn.jsx'
+import ChangeAvatar from './components/ChangeAvatar.jsx'
+import ChangeCoverImage from './components/ChangeCoverImage.jsx'
 
 const router=createBrowserRouter(
   [
@@ -31,6 +33,12 @@ const router=createBrowserRouter(
       {
         path:"/logout",
         element:<LogoutBtn/>
+      },{
+        path:"/changeavatar",
+        element:<ChangeAvatar/>
+      },{
+        path:"/changecoverimage",
+        element:<ChangeCoverImage/>
       }
     
     ]
